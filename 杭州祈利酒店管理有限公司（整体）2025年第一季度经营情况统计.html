@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>集团经营分析仪表板</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels"></script>
+    <style>
+        :root {
+            --primary: #2c3e50;
+            --positive: #27ae60;
+            --negative: #e74c3c;
+            --accent-blue: #3498db;
+            --accent-purple: #9b59b6;
+        }
+        .container {
+            max-width: 1440px;
+            margin: 2rem auto;
+            padding: 20px;
+        }
+        .card-container {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1.5rem;
+            margin-bottom: 3rem;
+        }
+        .metric-card {
+            background: white;
+            border-radius: 16px;
+            padding: 2rem;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.12);
+            position: relative;
+            overflow: hidden;
+        }
+        .metric-card::after {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            height: 100%;
+            width: 6px;
+        }
+        .gop-card::after { background: var(--accent-blue); }
+        .profit-card::after { background: var(--accent-purple); }
+        .metric-value {
+            font-size: 2.8rem;
+            margin: 1rem 0;
+            font-weight: 700;
+            letter-spacing: -1px;
+        }
+        .comparison-group {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+        .comparison-badge {
+            flex: 1;
+            padding: 0.8rem;
+            border-radius: 12px;
+            background: #f8f9fa;
+            display: flex;
+            flex-direction: column;
+        }
+        .chart-container {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.12);
+            padding: 2rem;
+            margin-bottom: 3rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- 战略指标卡片 -->
+        <div class="card-container">
+            <div class="metric-card gop-card">
+                <h3>GOP对比分析（万元）</h3>
+                <div class="metric-value" style="color:var(--negative);">107.50</div>
+                <div class="comparison-group">
+                    <div class="comparison-badge">
+                        <span style="color:#7f8c8d">预算对比</span>
+                        <span style="color:var(--negative);font-size:1.2em">▼21.03</span>
+                    </div>
+                    <div class="comparison-badge">
+                        <span style="color:#7f8c8d">同比变化</span>
+                        <span style="color:var(--negative);font-size:1.2em">▼168.13</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="metric-card profit-card">
+                <h3>净利润对比分析（万元）</h3>
+                <div class="metric-value" style="color:var(--negative);">-233.28</div>
+                <div class="comparison-group">
+                    <div class="comparison-badge">
+                        <span style="color:#7f8c8d">预算对比</span>
+                        <span style="color:var(--negative);font-size:1.2em">▼20.64</span>
+                    </div>
+                    <div class="comparison-badge">
+                        <span style="color:#7f8c8d">同比变化</span>
+                        <span style="color:var(--negative);font-size:1.2em">▼167.69</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 收入构成图表 -->
+        <div class="chart-container">
+            <canvas id="revenueChart"></canvas>
+        </div>
+
+        <!-- 经营指标图表 -->
+        <div class="chart-container">
+            <canvas id="kpiChart"></canvas>
+        </div>
+    </div>
+
+<script>
+// 收入数据配置
+const revenueConfig = {
+    type: 'bar',
+    data: {
+        labels: ['客房收入', '餐饮收入', '会议场租', '其他收入'],
+        datasets: [{
+            label: '实际',
+            data: [548.78, 293.2, 79.26, 360.45],
+            backgroundColor: 'rgba(52, 152, 219, 0.9)',
+            borderWidth: 0,
+            barThickness: 40
+        },{
+            label: '预算',
+            data: [684.04, 357.85, 94.14, 308.62],
+            backgroundColor: 'rgba(231, 76, 60, 0.9)',
+            borderWidth: 0,
+            barThickness: 40
+        },{
+            label: '去年同期',
+            data: [669.15, 482.91, 104.59, 337.46],
+            backgroundColor: 'rgba(46, 204, 113, 0.9)',
+            borderWidth: 0,
+            barThickness: 40
+        }]
+    },
+    options: {
+        responsive: true,
+        plugins: {
+            datalabels: {
+                color: '#2c3e50',
+                anchor: 'end',
+                align: 'top',
+                font: { size: 12 },
+                formatter: v => v.toFixed(2)
+            },
+            legend: { position: 'top', labels: { font: { size: 14 } } },
+            title: { 
+                display: true,
+                text: '收入构成对比分析（单位：万元）',
+                font: { size: 18 }
+            }
+        },
+        scales: {
+            x: {
+                grid: { display: false },
+                ticks: { 
+                    maxRotation: 45,
+                    minRotation: 45,
+                    font: { size: 13 }
+                }
+            },
+            y: {
+                beginAtZero: true,
+                title: { 
+                    display: true,
+                    text: '金额（万元）',
+                    font: { size: 14 }
+                }
+            }
+        }
+    }
+};
+
+// KPI指标配置
+const kpiConfig = {
+    type: 'line',
+    data: {
+        labels: ['出租率', '平均房价', '单房收益'],
+        datasets: [{
+            label: '实际',
+            data: [0.67, 228, 153],
+            borderColor: '#3498db',
+            backgroundColor: 'rgba(52, 152, 219, 0.1)',
+            tension: 0.3,
+            pointRadius: 6,
+            fill: true
+        },{
+            label: '预算',
+            data: [0.71, 267, 190],
+            borderColor: '#e74c3c',
+            backgroundColor: 'rgba(231, 76, 60, 0.1)',
+            tension: 0.3,
+            pointRadius: 6,
+            fill: true
+        }]
+    },
+    options: {
+        responsive: true,
+        plugins: {
+            datalabels: {
+                display: false
+            },
+            title: { 
+                display: true,
+                text: '关键经营指标趋势',
+                font: { size: 18 }
+            }
+        },
+        scales: {
+            y: {
+                beginAtZero: true,
+                ticks: {
+                    callback: function(value) {
+                        return this.getLabelForValue(value) + (value > 1 ? '元' : '%')
+                    }
+                }
+            }
+        }
+    }
+};
+
+// 初始化图表
+window.onload = () => {
+    Chart.register(ChartDataLabels);
+    
+    new Chart(document.getElementById('revenueChart'), revenueConfig);
+    new Chart(document.getElementById('kpiChart'), kpiConfig);
+};
+</script>
+</body>
+</html>

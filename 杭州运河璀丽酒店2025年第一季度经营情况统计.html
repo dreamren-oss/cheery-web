@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>酒店经营分析仪表板</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels"></script>
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --positive-color: #27ae60;
+            --negative-color: #e74c3c;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 20px;
+        }
+        .card-container {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        .metric-card {
+            background: #ffffff;
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            text-align: center;
+            border-left: 4px solid;
+        }
+        .gop-card { border-color: #2980b9; }
+        .profit-card { border-color: #8e44ad; }
+        .metric-value {
+            font-size: 2.4em;
+            margin: 15px 0;
+            font-weight: 700;
+        }
+        .comparison-badge {
+            display: inline-block;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.9em;
+            margin-top: 10px;
+        }
+        .chart-container {
+            margin-top: 30px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            padding: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- 核心指标卡片 -->
+        <div class="card-container">
+            <div class="metric-card gop-card">
+                <h3>GOP对比分析</h3>
+                <div class="metric-value">21.11</div>
+                <div>
+                    <span class="comparison-badge" style="background:#f1c40f;color:var(--primary-color);">
+                        vs预算: -27.79
+                    </span>
+                    <span class="comparison-badge" style="background:#e67e22;color:white;">
+                        vs同期: -107.72
+                    </span>
+                </div>
+            </div>
+            <div class="metric-card profit-card">
+                <h3>净利润对比分析</h3>
+                <div class="metric-value" style="color:var(--negative-color);">-155.19</div>
+                <div>
+                    <span class="comparison-badge" style="background:#f1c40f;color:var(--primary-color);">
+                        vs预算: -32.05
+                    </span>
+                    <span class="comparison-badge" style="background:#e67e22;color:white;">
+                        vs同期: -124.24
+                    </span>
+                </div>
+            </div>
+        </div>
+
+        <!-- 收入构成分析 -->
+        <div class="chart-container">
+            <canvas id="revenueChart"></canvas>
+        </div>
+    </div>
+
+    <script>
+        // 收入数据配置
+        const revenueData = {
+            labels: ['客房收入', '餐饮收入', '会议场租', '其他收入'],
+            datasets: [{
+                label: '实际收入',
+                data: [309.19, 238.77, 51.10, 242.36],
+                backgroundColor: 'rgba(52, 152, 219, 0.8)',
+                borderWidth: 0
+            }, {
+                label: '预算收入',
+                data: [425.67, 287.79, 61.21, 196.43],
+                backgroundColor: 'rgba(231, 76, 60, 0.8)',
+                borderWidth: 0
+            }, {
+                label: '去年同期',
+                data: [385.51, 378.03, 44.52, 185.72],
+                backgroundColor: 'rgba(46, 204, 113, 0.8)',
+                borderWidth: 0
+            }]
+        };
+
+        // 图表配置
+        const config = {
+            type: 'bar',
+            data: revenueData,
+            options: {
+                responsive: true,
+                plugins: {
+                    datalabels: {
+                        anchor: 'end',
+                        align: 'top',
+                        color: '#2c3e50',
+                        font: { size: 12 },
+                        formatter: (value) => value.toFixed(2)
+                    },
+                    legend: { 
+                        position: 'top',
+                        labels: { padding: 20, font: { size: 14 } }
+                    },
+                    title: {
+                        display: true,
+                        text: '收入构成对比分析（单位：万元）',
+                        font: { size: 18 }
+                    }
+                },
+                scales: {
+                    x: {
+                        grid: { display: false },
+                        ticks: { 
+                            maxRotation: 45,
+                            minRotation: 45,
+                            font: { size: 13 }
+                        }
+                    },
+                    y: {
+                        beginAtZero: true,
+                        title: { 
+                            display: true, 
+                            text: '金额（万元）',
+                            font: { size: 14 }
+                        }
+                    }
+                },
+                barPercentage: 0.8,
+                categoryPercentage: 0.7
+            }
+        };
+
+        // 初始化图表
+        window.onload = () => {
+            const ctx = document.getElementById('revenueChart').getContext('2d');
+            Chart.register(ChartDataLabels);
+            new Chart(ctx, config);
+        };
+    </script>
+</body>
+</html>

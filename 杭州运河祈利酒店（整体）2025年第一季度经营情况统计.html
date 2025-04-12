@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Q1财务分析报告</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
+    <style>
+        :root {
+            --primary-red: #e74c3c;
+            --primary-blue: #3498db;
+            --primary-green: #27ae60;
+            --primary-yellow: #f1c40f;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: #f8f9fa;
+        }
+        .dashboard {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        .header h1 {
+            color: #2c3e50;
+            font-size: 2.2em;
+            margin-bottom: 10px;
+        }
+        .card-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
+            margin-bottom: 40px;
+        }
+        .metric-card {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 6px 15px rgba(0,0,0,0.08);
+            transition: transform 0.3s ease;
+        }
+        .metric-card:hover {
+            transform: translateY(-5px);
+        }
+        .metric-value {
+            font-size: 2.4em;
+            font-weight: 700;
+            margin: 15px 0;
+        }
+        .metric-label {
+            color: #7f8c8d;
+            font-size: 0.95em;
+        }
+        .comparison {
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid #eee;
+        }
+        .chart-section {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            margin-bottom: 40px;
+            box-shadow: 0 6px 15px rgba(0,0,0,0.08);
+        }
+        .chart-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-top: 30px;
+        }
+        .negative { color: var(--primary-red); }
+        .positive { color: var(--primary-green); }
+        .chart-title {
+            font-size: 1.4em;
+            color: #2c3e50;
+            margin-bottom: 25px;
+            font-weight: 600;
+            text-align: center;
+        }
+        canvas { 
+            max-height: 500px;
+            margin: 0 auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard">
+        <div class="header">
+            <h1>杭州祈利酒店管理有限公司（整体）2025年第一季度经营情况统计
+</h1>
+            <p>单位：人民币万元（保留两位小数）</p>
+        </div>
+
+        <!-- 核心指标卡片 -->
+        <div class="card-container">
+            <div class="metric-card">
+                <div class="metric-label">实际累计GOP</div>
+                <div class="metric-value negative">-233.28</div>
+                <div class="comparison">
+                    <span class="negative">超预算 20.64</span> · 
+                    <span class="negative">同比下跌 167.69</span>
+                </div>
+            </div>
+            
+            <div class="metric-card">
+                <div class="metric-label">预算累计GOP</div>
+                <div class="metric-value negative">-212.64</div>
+                <div class="comparison">
+                    <span class="positive">完成率 91.2%</span>
+                </div>
+            </div>
+
+            <div class="metric-card">
+                <div class="metric-label">去年同期GOP</div>
+                <div class="metric-value negative">-65.59</div>
+                <div class="comparison">
+                    <span class="negative">同比基准线</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- 环形图 -->
+        <div class="chart-section">
+            <div class="chart-title">GOP构成分析</div>
+            <canvas id="gopDonut"></canvas>
+        </div>
+
+        <!-- 分项分析 -->
+        <div class="chart-section">
+            <div class="chart-title">分项净利润对比分析</div>
+            <div class="chart-grid">
+                <div>
+                    <canvas id="projectBars"></canvas>
+                </div>
+                <div>
+                    <canvas id="comparisonLines"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+<script>
+// 环形图配置
+new Chart(document.getElementById('gopDonut'), {
+    type: 'doughnut',
+    data: {
+        labels: ['实际累计', '预算累计', '去年同期'],
+        datasets: [{
+            data: [233.28, 212.64, 65.59],
+            backgroundColor: [
+                'rgba(231, 76, 60, 0.9)',
+                'rgba(241, 196, 15, 0.9)',
+                'rgba(52, 152, 219, 0.9)'
+            ],
+            borderWidth: 0
+        }]
+    },
+    options: {
+        cutout: '70%',
+        plugins: {
+            legend: { position: 'bottom' },
+            datalabels: {
+                formatter: (v) => `${Math.abs(v).toFixed(2)}万`,
+                color: '#fff',
+                font: { weight: 'bold' }
+            },
+            tooltip: {
+                callbacks: {
+                    label: ctx => `${ctx.label}: ¥${Math.abs(ctx.raw).toFixed(2)}万 (${ctx.raw < 0 ? '亏损' : '盈利'})`
+                }
+            }
+        }
+    },
+    plugins: [ChartDataLabels]
+});
+
+// 分项柱状图
+new Chart(document.getElementById('projectBars'), {
+    type: 'bar',
+    data: {
+        labels: ['运河璀丽酒店', '大兜路祈居', '汉宫号', '新黄龙号', '江薇号'],
+        datasets: [
+            {
+                label: '实际',
+                data: [-155.19, -7.58, -13.06, -20.13, -3.25],
+                backgroundColor: 'rgba(231, 76, 60, 0.8)',
+                borderWidth: 0
+            },
+            {
+                label: '预算',
+                data: [-123.14, -11.21, -7.11, -25.80, 0.10],
+                backgroundColor: 'rgba(241, 196, 15, 0.8)',
+                borderWidth: 0
+            }
+        ]
+    },
+    options: {
+        scales: {
+            x: { stacked: true },
+            y: { 
+                ticks: { 
+                    callback: v => `¥${v.toFixed(2)}` 
+                }
+            }
+        },
+        plugins: {
+            datalabels: {
+                anchor: 'end',
+                align: 'top',
+                formatter: v => Math.abs(v).toFixed(2),
+                color: '#333'
+            }
+        }
+    },
+    plugins: [ChartDataLabels]
+});
+
+// 对比折线图
+new Chart(document.getElementById('comparisonLines'), {
+    type: 'line',
+    data: {
+        labels: ['运河璀丽酒店', '大兜路祈居', '汉宫号', '新黄龙号', '江薇号'],
+        datasets: [
+            {
+                label: '预算差异',
+                data: [-32.05, 3.62, -5.95, 5.67, -3.35],
+                borderColor: '#9b59b6',
+                tension: 0.3,
+                fill: false
+            },
+            {
+                label: '同期差异',
+                data: [-124.24, -9.19, -3.14, -7.38, -2.45],
+                borderColor: '#2ecc71',
+                tension: 0.3,
+                fill: false
+            }
+        ]
+    },
+    options: {
+        scales: {
+            y: {
+                ticks: { 
+                    callback: v => `¥${v.toFixed(2)}` 
+                }
+            }
+        },
+        plugins: {
+            datalabels: {
+                display: false
+            }
+        }
+    }
+});
+</script>
+</body>
+</html>
